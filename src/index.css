@@ -1,0 +1,35 @@
+@import '@fontsource/noto-kufi-arabic/400.css';
+@import '@fontsource/noto-kufi-arabic/500.css';
+@import '@fontsource/noto-kufi-arabic/600.css';
+@import '@fontsource/noto-kufi-arabic/700.css';
+@import '@fontsource/noto-kufi-arabic/800.css';
+:root{font-family:'Noto Kufi Arabic',sans-serif;color:var(--text);background:var(--page);font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-weight:400;line-height:1.9}*{box-sizing:border-box}body{margin:0;min-width:320px}a{color:inherit;text-decoration:none}button,input{font:inherit}button,a,input{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #188a70;outline-offset:5px}::selection{background:#bde7d9}h1,h2,h3,p{margin:0}svg{flex-shrink:0}button{color:inherit}html{scroll-behavior:smooth;scroll-padding-top:100px}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+
+:root {
+  color-scheme: light;
+  --page: #fafaf9;
+  --text: #202124;
+  --muted: #626b62;
+  --subtle: #6c766b;
+  --border: #dfe3da;
+  --surface: #f0f2ec;
+  --raised: #fff;
+  --header: #fafaf9ed;
+  --accent: #263d33;
+  --accent-hover: #34644e;
+  --accent-text: #fff;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --page: #131715;
+  --text: #edf1eb;
+  --muted: #b0baae;
+  --subtle: #a1ae9f;
+  --border: #343e35;
+  --surface: #202820;
+  --raised: #2b352c;
+  --header: #131715ed;
+  --accent: #b2d4bb;
+  --accent-hover: #c7e8d0;
+  --accent-text: #16261a;
+}
