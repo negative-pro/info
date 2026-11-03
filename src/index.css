@@ -33,3 +33,6 @@
   --accent-hover: #c7e8d0;
   --accent-text: #16261a;
 }
+
+.mixed-text { unicode-bidi: isolate; }
+.story-card h3, .story-detail > h1, .feature-content h2 { text-align: start; }

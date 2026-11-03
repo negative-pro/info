@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Monitor, Moon, Sun } from 'lucide-react'
-import text from '../content/ar.json'
-import lightLogo from '../assets/brank_dark.png'
-import darkLogo from '../assets/brand_logo.png'
+import text from '../content/ar/texts.json'
 
 type Preference = 'system' | 'light' | 'dark'
 const options = ['system', 'light', 'dark'] as const
@@ -21,7 +19,6 @@ export default function Appearance() {
     function apply() {
       const dark = preference === 'dark' || (preference === 'system' && media.matches)
       document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-      document.querySelector<HTMLLinkElement>('link[rel="icon"]')?.setAttribute('href', dark ? darkLogo : lightLogo)
       document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#131715' : '#fafaf9')
     }
     apply()

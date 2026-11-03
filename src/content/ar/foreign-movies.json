@@ -1,0 +1,97 @@
+{
+  "category": {
+    "id": "foreign",
+    "slug": "foreign",
+    "name": "أجنبي",
+    "description": "سينما ومسلسلات من كل العالم، نحكي عنها بالعربي.",
+    "order": 2
+  },
+  "items": [
+    {
+      "id": "item-a70493ee-5758-4166-8b18-c28546bbc1a7",
+      "kind": "video",
+      "platform": "youtube",
+      "title": "The Rip (2026): هل يستحق المشاهدة؟",
+      "description": "مراجعة The Rip مع مات ديمون وبن أفليك. نناقش الفيلم والسؤال الأهم: هل يستحق وقتك؟",
+      "body": [],
+      "externalUrl": "https://www.youtube.com/watch?v=BYCi1wH2Aug",
+      "isDemo": false,
+      "publishedAt": null,
+      "thumbnailAsset": null,
+      "videoLayout": "landscape",
+      "work": {
+        "title": "The Rip",
+        "originalTitle": "The Rip",
+        "type": "film",
+        "year": 2026,
+        "directors": [
+          "جو كارنهان"
+        ],
+        "writers": [
+          "جو كارنهان"
+        ],
+        "editors": [],
+        "providerIds": [
+          "netflix"
+        ],
+        "imdb": {
+          "url": "https://www.imdb.com/title/tt32642706/",
+          "rating": null,
+          "ratingCount": null,
+          "checkedAt": null
+        },
+        "sources": [
+          {
+            "label": "Netflix Tudum",
+            "url": "https://www.netflix.com/tudum/articles/rip-ben-affleck-matt-damon-release-date-photos-news"
+          }
+        ],
+        "partNumber": null,
+        "seasonCount": null,
+        "cast": [],
+        "genres": [],
+        "countries": [],
+        "languages": [],
+        "runtimeMinutes": null,
+        "synopsis": null,
+        "franchise": null,
+        "seasonNumber": null
+      }
+    },
+    {
+      "id": "item-ceb83649-e86a-46ff-a379-8c640774390e",
+      "kind": "video",
+      "platform": "instagram",
+      "title": "مسلسل الغموض والجريمة التشيلي الشيق Catedrales (الكاتدرائيات)",
+      "description": "مراجعة مسلسل Catedrales (الكاتدرائيات) على إنستغرام.",
+      "body": [],
+      "externalUrl": "https://www.instagram.com/reel/DfN_cwxMvGa/",
+      "isDemo": false,
+      "publishedAt": null,
+      "thumbnailAsset": "thumbnails/instagram-catedrales.jpg",
+      "videoLayout": "portrait",
+      "work": {
+        "title": "الكاتدرائيات",
+        "originalTitle": "Catedrales",
+        "type": "series",
+        "year": null,
+        "directors": [],
+        "writers": [],
+        "editors": [],
+        "providerIds": [],
+        "imdb": null,
+        "sources": [],
+        "partNumber": null,
+        "seasonCount": null,
+        "cast": [],
+        "genres": [],
+        "countries": [],
+        "languages": [],
+        "runtimeMinutes": null,
+        "synopsis": null,
+        "franchise": null,
+        "seasonNumber": null
+      }
+    }
+  ]
+}

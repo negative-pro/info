@@ -1,0 +1,14 @@
+[
+  {
+    "id": "netflix",
+    "name": "نتفليكس",
+    "iconAsset": null,
+    "websiteUrl": "https://www.netflix.com/"
+  },
+  {
+    "id": "apple-tv",
+    "name": "Apple TV",
+    "iconAsset": null,
+    "websiteUrl": "https://tv.apple.com/"
+  }
+]

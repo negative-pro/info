@@ -1,0 +1,58 @@
+[
+  {
+    "id": "youtube",
+    "name": "يوتيوب",
+    "latin": "YouTube",
+    "description": "للحكاية كاملة",
+    "url": "https://www.youtube.com/@negative-cinema",
+    "followerCount": null,
+    "subscriberCount": null,
+    "monthlyVisitors": null,
+    "statsUpdatedAt": null,
+    "communityText": "انضم إلى مجتمعنا على يوتيوب",
+    "communityWithFollowers": "انضم إلى {count} متابع على يوتيوب",
+    "communityWithSubscribers": "انضم إلى {count} مشترك على يوتيوب"
+  },
+  {
+    "id": "instagram",
+    "name": "إنستغرام",
+    "latin": "Instagram",
+    "description": "مشهد من كل حكاية",
+    "url": "https://www.instagram.com/azdashir_jlal?utm_source=ig_web_button_share_sheet&exln=ZDNlZDc0MzIxNw==",
+    "followerCount": 10000,
+    "subscriberCount": null,
+    "monthlyVisitors": null,
+    "statsUpdatedAt": null,
+    "communityText": "انضم إلى مجتمعنا على إنستغرام",
+    "communityWithFollowers": "انضم إلى {count} متابع على إنستغرام",
+    "communityWithSubscribers": "انضم إلى {count} مشترك على إنستغرام"
+  },
+  {
+    "id": "tiktok",
+    "name": "تيك توك",
+    "latin": "TikTok",
+    "description": "ترشيحات على السريع",
+    "url": "https://www.tiktok.com/@negative.pro4?is_from_webapp=1&sender_device=pc",
+    "followerCount": 13000,
+    "subscriberCount": null,
+    "monthlyVisitors": null,
+    "statsUpdatedAt": null,
+    "communityText": "انضم إلى مجتمعنا على تيك توك",
+    "communityWithFollowers": "انضم إلى {count} متابع على تيك توك",
+    "communityWithSubscribers": "انضم إلى {count} مشترك على تيك توك"
+  },
+  {
+    "id": "facebook",
+    "name": "فيسبوك",
+    "latin": "Facebook",
+    "description": "نكمل النقاش هنا",
+    "url": "https://www.facebook.com/azdshyr.jlal.ahmd?locale=de_DE",
+    "followerCount": 15000,
+    "subscriberCount": null,
+    "monthlyVisitors": null,
+    "statsUpdatedAt": null,
+    "communityText": "انضم إلى مجتمعنا على فيسبوك",
+    "communityWithFollowers": "انضم إلى {count} متابع على فيسبوك",
+    "communityWithSubscribers": "انضم إلى {count} مشترك على فيسبوك"
+  }
+]
