@@ -39,3 +39,11 @@ it('does not render an incomplete or unsafe account URL as a link', () => {
   render(<SocialSection accounts={[{ ...accounts[0], url: 'javascript:alert(1)' }]}/>)
   expect(screen.queryByRole('link')).not.toBeInTheDocument()
 })
+
+it('omits hidden accounts and omits the section when every account is hidden', () => {
+  const { rerender } = render(<SocialSection accounts={[{ ...accounts[0], hidden: true }, accounts[1]]}/>)
+  expect(screen.queryByText(accounts[0].name)).not.toBeInTheDocument()
+  expect(screen.getByText(accounts[1].name)).toBeInTheDocument()
+  rerender(<SocialSection accounts={[{ ...accounts[0], hidden: true }]}/>)
+  expect(document.querySelector('#social')).toBeNull()
+})

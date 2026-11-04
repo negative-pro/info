@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { parseCategoryContent } from '../src/models/validation.ts'
 import { cachePlatformThumbnail } from './platform-thumbnail.ts'
-import type { ContentItem, WorkDetails, Provider } from '../src/models/content.ts'
+import type { ContentItem, WorkDetails, Provider, SocialAccount } from '../src/models/content.ts'
 
 export class ContentError extends Error {
   code: 'invalid' | 'duplicate' | 'category' | 'thumbnail'
@@ -78,15 +78,12 @@ export async function saveContent(root: string, value: unknown): Promise<{ id: s
   if (!record) return fail('category')
   const id = postInput.id == null || postInput.id === '' ? `item-${randomUUID()}` : slug(postInput.id)
   if (records.some(item => item.data.items.some(post => post.id === id))) return fail('duplicate')
-  const platform = ['youtube', 'facebook', 'instagram', 'tiktok', 'website'].includes(String(postInput.platform)) ? postInput.platform as ContentItem['platform'] : fail()
-  const kind = postInput.kind === 'post' || postInput.kind === 'video' ? postInput.kind : fail()
+  const platform = postInput.platform === 'youtube' ? 'youtube' : fail()
+  const kind = postInput.kind === 'video' ? 'video' : fail()
   const externalUrl = url(postInput.externalUrl)
-  if (platform !== 'website' && !externalUrl) fail()
-  if (externalUrl && platform !== 'website') {
-    const hostname = new URL(externalUrl).hostname
-    const domains = { youtube: ['youtube.com', 'youtu.be'], facebook: ['facebook.com', 'fb.watch'], instagram: ['instagram.com'], tiktok: ['tiktok.com'] }
-    if (!domains[platform].some(domain => hostname === domain || hostname.endsWith(`.${domain}`))) fail()
-  }
+  if (!externalUrl) fail()
+  const hostname = new URL(externalUrl!).hostname
+  if (!['youtube.com', 'youtu.be'].some(domain => hostname === domain || hostname.endsWith(`.${domain}`))) fail()
   const layout = postInput.videoLayout === 'portrait' || postInput.videoLayout === 'landscape' ? postInput.videoLayout : fail()
   if (!Array.isArray(postInput.body) || postInput.body.length > 100) fail()
   let work: WorkDetails | null = null
@@ -103,4 +100,57 @@ export async function saveContent(root: string, value: unknown): Promise<{ id: s
   await writeFile(temporary, `${JSON.stringify(record.data, null, 2)}\n`, 'utf8')
   await rename(temporary, target)
   return { id, file: `src/content/ar/${record.name}` }
+}
+
+/** Change publication visibility without replacing editorial metadata. */
+export async function setContentVisibility(root: string, value: unknown) {
+  const input = object(value)
+  const id = slug(input.id)
+  if (typeof input.hidden !== 'boolean') fail()
+  const directory = join(root, 'src/content/ar')
+  const files = (await readdir(directory)).filter(name => name.endsWith('-movies.json'))
+  for (const name of files) {
+    const target = join(directory, name)
+    const data = parseCategoryContent(JSON.parse(await readFile(target, 'utf8')), name)
+    const item = data.items.find(post => post.id === id)
+    if (!item) continue
+    item.hidden = input.hidden as boolean
+    const temporary = `${target}.${randomUUID()}.tmp`
+    await writeFile(temporary, `${JSON.stringify(data, null, 2)}\n`, 'utf8')
+    await rename(temporary, target)
+    return { id, hidden: item.hidden }
+  }
+  return fail()
+}
+
+/** Update only social visibility/statistics, preserving account copy and links. */
+export async function updateSocialAccount(root: string, value: unknown) {
+  const input = object(value)
+  const id = slug(input.id)
+  const target = join(root, 'src/content/ar/social-accounts.json')
+  const accounts = JSON.parse(await readFile(target, 'utf8')) as SocialAccount[]
+  const account = accounts.find(item => item.id === id)
+  if (!account) return fail()
+  let changed = false
+  if (input.hidden !== undefined) {
+    if (typeof input.hidden !== 'boolean') return fail()
+    account.hidden = input.hidden
+    changed = true
+  }
+  for (const key of ['followerCount', 'subscriberCount', 'monthlyVisitors'] as const) {
+    if (input[key] === undefined) continue
+    if (input[key] !== null && (typeof input[key] !== 'number' || !Number.isSafeInteger(input[key]) || Number(input[key]) < 0)) return fail()
+    account[key] = input[key] as number | null
+    changed = true
+  }
+  if (input.statsUpdatedAt !== undefined) {
+    if (input.statsUpdatedAt !== null && (typeof input.statsUpdatedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(input.statsUpdatedAt) || Number.isNaN(Date.parse(input.statsUpdatedAt)) || new Date(input.statsUpdatedAt).toISOString().slice(0, 10) !== input.statsUpdatedAt)) return fail()
+    account.statsUpdatedAt = input.statsUpdatedAt as string | null
+    changed = true
+  }
+  if (!changed) return fail()
+  const temporary = `${target}.${randomUUID()}.tmp`
+  await writeFile(temporary, `${JSON.stringify(accounts, null, 2)}\n`, 'utf8')
+  await rename(temporary, target)
+  return account
 }

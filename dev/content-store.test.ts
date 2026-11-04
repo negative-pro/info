@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { saveContent } from './content-store.ts'
+import { saveContent, setContentVisibility, updateSocialAccount } from './content-store.ts'
 
 let root: string
 const seed = { category: { id: 'arabic', slug: 'arabic', name: 'Arabic', description: '', order: 1 }, items: [] }
@@ -40,6 +40,8 @@ describe('local JSON content storage', () => {
   })
   it.each([
     { id: '../../outside' },
+    { platform: 'facebook' },
+    { kind: 'post' },
     { externalUrl: 'javascript:alert(1)' },
     { externalUrl: 'https://youtube.com.evil.test/watch?v=BYCi1wH2Aug' },
     { thumbnailAsset: '../../outside.png' },
@@ -103,4 +105,34 @@ it('preserves optional film metadata and rejects inconsistent season details', a
   expect(JSON.parse(before).items[0].work).toEqual(work)
   await expect(saveContent(root, { ...base, item: { ...base.item, id: 'bad-season', work: { ...work, type: 'series', partNumber: null, runtimeMinutes: null, seasonNumber: 5, seasonCount: 4 } } })).rejects.toMatchObject({ code: 'invalid' })
   expect(await readFile(join(root, result.file), 'utf8')).toBe(before)
+})
+
+it('persists visibility changes without changing content and rejects invalid targets', async () => {
+  const input = payload()
+  await saveContent(root, input)
+  const target = join(root, 'src/content/ar/arabic-movies.json')
+  const before = JSON.parse(await readFile(target, 'utf8')).items[0]
+  await expect(setContentVisibility(root, { id: before.id, hidden: true })).resolves.toEqual({ id: before.id, hidden: true })
+  expect(JSON.parse(await readFile(target, 'utf8')).items[0]).toEqual({ ...before, hidden: true })
+  await setContentVisibility(root, { id: before.id, hidden: false })
+  expect(JSON.parse(await readFile(target, 'utf8')).items[0].hidden).toBe(false)
+  await expect(setContentVisibility(root, { id: before.id, hidden: 'yes' })).rejects.toMatchObject({ code: 'invalid' })
+  await expect(setContentVisibility(root, { id: 'missing', hidden: true })).rejects.toMatchObject({ code: 'invalid' })
+})
+
+it('saves social visibility and statistics while preserving account metadata', async () => {
+  const target = join(root, 'src/content/ar/social-accounts.json')
+  const account = { id: 'youtube', name: 'YouTube', url: 'https://www.youtube.com/@negative', followerCount: null, subscriberCount: 100, monthlyVisitors: null, statsUpdatedAt: null }
+  await writeFile(target, JSON.stringify([account]))
+  await updateSocialAccount(root, { id: 'youtube', hidden: true })
+  expect(JSON.parse(await readFile(target, 'utf8'))[0]).toEqual({ ...account, hidden: true })
+  await updateSocialAccount(root, { id: 'youtube', hidden: false, subscriberCount: 0, monthlyVisitors: 200, followerCount: null, statsUpdatedAt: '2026-11-04' })
+  const saved = JSON.parse(await readFile(target, 'utf8'))[0]
+  expect(saved).toEqual({ ...account, hidden: false, subscriberCount: 0, monthlyVisitors: 200, statsUpdatedAt: '2026-11-04' })
+  for (const update of [{ subscriberCount: -1 }, { subscriberCount: 1.5 }, { followerCount: '100' }, { monthlyVisitors: Number.MAX_SAFE_INTEGER + 1 }, { hidden: 'yes' }, { statsUpdatedAt: '2026-02-30' }, { id: 'missing', hidden: true }]) {
+    await expect(updateSocialAccount(root, { id: 'youtube', ...update })).rejects.toMatchObject({ code: 'invalid' })
+    expect(JSON.parse(await readFile(target, 'utf8'))[0]).toEqual(saved)
+  }
+  await updateSocialAccount(root, { id: 'youtube', subscriberCount: null, statsUpdatedAt: null })
+  expect(JSON.parse(await readFile(target, 'utf8'))[0]).toMatchObject({ subscriberCount: null, statsUpdatedAt: null })
 })

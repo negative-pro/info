@@ -1,24 +1,60 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { Site } from './App'
 import { categories, items } from './data/catalog'
 import text from './content/ar/texts.json'
 import accounts from './content/ar/social-accounts.json'
 
+// Public-layout fixtures stay visible regardless of local dashboard changes.
+vi.mock('./data/catalog', async importOriginal => {
+  const catalog = await importOriginal<typeof import('./data/catalog')>()
+  return { ...catalog, items: catalog.allItems.map(item => ({ ...item, hidden: false })) }
+})
+
 const rip = items.find(post => post.id === 'item-a70493ee-5758-4166-8b18-c28546bbc1a7')!
 const film = rip.work!
-const facebook = items.find(post => post.id === 'item-c4aa5830-2f11-4efc-9325-39732dfc7f8e')!
-const tiktok = items.find(post => post.id === 'item-f83c9c11-f502-4350-a67a-4bc11d3dea48')!
-const instagram = items.find(post => post.id === 'item-ceb83649-e86a-46ff-a379-8c640774390e')!
 function page(path = '/') { return render(<MemoryRouter initialEntries={[path]}><Site/></MemoryRouter>) }
 describe('Arabic website catalog', () => {
+  it.each([['/', 'home'], ['/discover', 'discover'], ['/about', 'about']] as const)('scrolls to the top when the current %s navbar link is clicked', async (path, key) => {
+    page(path)
+    vi.mocked(window.scrollTo).mockClear()
+    await userEvent.click(screen.getByRole('link', { name: text.nav[key] }))
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
+  })
+
+  it('restores the previous page position when switching navbar pages', async () => {
+    let scrollPosition = 0
+    const scroll = vi.mocked(window.scrollTo)
+    const originalScrollY = Object.getOwnPropertyDescriptor(window, 'scrollY')
+    Object.defineProperty(window, 'scrollY', { configurable: true, get: () => scrollPosition })
+    scroll.mockImplementation(((options: ScrollToOptions | number, y?: number) => {
+      scrollPosition = typeof options === 'number' ? y ?? 0 : options.top ?? 0
+    }) as typeof window.scrollTo)
+    try {
+      page('/')
+      scrollPosition = 650
+      await userEvent.click(screen.getByRole('link', { name: text.nav.discover }))
+      expect(scrollPosition).toBe(0)
+      scrollPosition = 300
+      await userEvent.click(screen.getByRole('link', { name: text.nav.home }))
+      expect(scrollPosition).toBe(650)
+      await userEvent.click(screen.getByRole('link', { name: text.nav.home }))
+      expect(scrollPosition).toBe(0)
+      await userEvent.click(screen.getByRole('link', { name: text.nav.discover }))
+      expect(scrollPosition).toBe(300)
+    } finally {
+      scroll.mockReset()
+      if (originalScrollY) Object.defineProperty(window, 'scrollY', originalScrollY)
+    }
+  })
+
   it('places theme controls in the footer and opens legal pages', async () => {
     page()
     expect(screen.getByRole('contentinfo')).toContainElement(screen.getByRole('group', { name: text.appearance.label }))
     expect(screen.getByRole('banner')).not.toContainElement(screen.getByRole('group', { name: text.appearance.label }))
-    for (const title of ['بيانات الموقع — Impressum', 'سياسة الخصوصية', 'شروط الاستخدام — AGB', 'حقوق النشر']) {
+    for (const title of ['بيانات الموقع', 'سياسة الخصوصية', 'شروط الاستخدام', 'حقوق النشر']) {
       await userEvent.click(screen.getByRole('link', { name: title }))
       expect(screen.getByRole('heading', { level: 1, name: title })).toBeInTheDocument()
     }
@@ -36,35 +72,27 @@ describe('Arabic website catalog', () => {
     expect(screen.getByRole('link', { name: text.nav.discover })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('link', { name: text.nav.home })).not.toHaveClass('active')
   })
-  it('chooses an available platform for each category and isolates content', async () => {
-    page('/discover')
-    await userEvent.click(screen.getByRole('link', { name: categories[0].name }))
-    expect(screen.getByRole('heading', { name: facebook.title })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: rip.title })).not.toBeInTheDocument()
-    await userEvent.click(screen.getByRole('button', { name: text.discover.platformNames.tiktok }))
-    expect(screen.getByRole('heading', { name: tiktok.title })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: facebook.title })).not.toBeInTheDocument()
-    await userEvent.click(screen.getByRole('button', { name: text.discover.platformNames.instagram }))
-    expect(screen.getByText(text.discover.emptyPlatform)).toBeInTheDocument()
-  })
-  it('shows all platforms together and keeps search working', async () => {
-    page('/discover?platform=all')
-    expect(screen.getByRole('button', { name: text.discover.allPlatforms })).toHaveAttribute('aria-pressed', 'true')
-    for (const post of [rip, facebook, tiktok, instagram]) expect(screen.getByRole('heading', { name: post.title })).toBeInTheDocument()
-    await userEvent.type(screen.getByRole('textbox'), rip.title)
-    expect(screen.getByRole('heading', { name: rip.title })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: facebook.title })).not.toBeInTheDocument()
-  })
-  it('supports direct platform URLs and title/credit search', async () => {
+  it('shows only YouTube posts and ignores old platform URLs', () => {
     page('/discover?platform=tiktok')
-    expect(screen.getByRole('button', { name: text.discover.platformNames.tiktok })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('heading', { name: tiktok.title })).toBeInTheDocument()
-    await userEvent.click(screen.getByRole('button', { name: text.discover.platformNames.youtube }))
-    await userEvent.type(screen.getByRole('textbox'), 'xyz')
-    expect(screen.getByText(text.discover.empty)).toBeInTheDocument()
-    await userEvent.clear(screen.getByRole('textbox'))
+    expect(screen.queryByRole('group', { name: text.discover.typeFilter })).toBeInTheDocument()
+    expect(document.querySelectorAll('.catalog-card')).toHaveLength(items.length)
+    expect(screen.getByRole('heading', { name: rip.title })).toBeInTheDocument()
+  })
+  it('filters movies and series and retains search across categories', async () => {
+    page('/discover?type=film')
+    expect(screen.getByRole('button', { name: text.discover.film })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('heading', { name: rip.title })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: text.discover.series }))
+    expect(screen.queryByRole('heading', { name: rip.title })).not.toBeInTheDocument()
+    expect(document.querySelectorAll('.catalog-card')).toHaveLength(items.filter(item => item.work?.type === 'series').length)
+    await userEvent.click(screen.getByRole('link', { name: categories[1].name }))
+    expect(screen.getByRole('button', { name: text.discover.series })).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(screen.getByRole('button', { name: text.discover.all }))
     await userEvent.type(screen.getByRole('textbox'), film.directors[0])
     expect(screen.getByRole('heading', { name: rip.title })).toBeInTheDocument()
+    await userEvent.clear(screen.getByRole('textbox'))
+    await userEvent.type(screen.getByRole('textbox'), 'xyz')
+    expect(screen.getByText(text.discover.empty)).toBeInTheDocument()
   })
   it('preserves search across categories and clears it', async () => {
     page('/discover?q=netflix')
@@ -87,24 +115,15 @@ describe('Arabic website catalog', () => {
     expect(screen.getByRole('link', { name: `${text.catalog.watchOn} نتفليكس` })).toBeInTheDocument()
     expect(screen.getByText('2026', { selector: 'dd' })).toBeInTheDocument()
     expect(screen.queryByText(text.catalog.editors)).not.toBeInTheDocument()
-    expect(screen.getByRole('link', { name: text.catalog.imdb })).toHaveAttribute('href', film.imdb?.url)
+    expect(screen.queryByRole('link', { name: /IMDb/i })).not.toBeInTheDocument()
     expect(screen.queryByText(text.catalog.rating)).not.toBeInTheDocument()
   })
-  it.each([['youtube', rip], ['facebook', facebook], ['tiktok', tiktok], ['instagram', instagram]] as const)('links the %s thumbnail directly to its original post', (platform, post) => {
-    page(`/discover?platform=${platform}`)
-    const link = screen.getByRole('link', { name: text.catalog[platform] })
-    expect(link).toHaveAttribute('href', post.externalUrl)
+  it('links YouTube thumbnails to the original video', () => {
+    page('/discover')
+    const link = screen.getAllByRole('link', { name: text.catalog.youtube }).find(action => action.getAttribute('href') === rip.externalUrl && action.querySelector('img'))!
+    expect(link).toHaveAttribute('href', rip.externalUrl)
     expect(link).toHaveAttribute('target', '_blank')
-    const source = link.querySelector('img')!.getAttribute('src')!
-    if (platform === 'youtube') expect(source).toBe('https://i.ytimg.com/vi/BYCi1wH2Aug/hqdefault.jpg')
-    else if (platform === 'tiktok' || platform === 'instagram') expect(source).toContain('thumbnails/')
-    else expect(source).toContain('negative-plaeholder')
-  })
-  it('shows the Instagram Reel in the foreign category with a portrait cover', () => {
-    page('/category/foreign?platform=instagram')
-    expect(screen.getByRole('heading', { name: instagram.title })).toBeInTheDocument()
-    expect(document.querySelector('.catalog-card')).toHaveAttribute('data-layout', 'portrait')
-    expect(screen.getByRole('link', { name: text.catalog.instagram })).toHaveAttribute('href', instagram.externalUrl)
+    expect(link.querySelector('img')).toHaveAttribute('src', 'https://i.ytimg.com/vi/N-y71o8a4Ug/hqdefault.jpg')
   })
   it('renders social accounts from configuration', () => {
     page('/about')

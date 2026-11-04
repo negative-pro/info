@@ -11,6 +11,7 @@ export interface ContentItem {
   externalUrl: string | null
   videoLayout?: 'portrait' | 'landscape'
   thumbnailAsset?: string | null
+  hidden?: boolean
   isDemo: boolean
   publishedAt: string | null
 }

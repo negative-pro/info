@@ -55,6 +55,7 @@ const categoryContent = shape({
     externalUrl: nullable(string),
     videoLayout: optional(choices('portrait', 'landscape')),
     thumbnailAsset: optional(nullable(string)),
+    hidden: optional(value => typeof value === 'boolean'),
     isDemo: value => typeof value === 'boolean',
     publishedAt: nullable(string),
   })),

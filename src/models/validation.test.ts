@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import arabic from '../content/ar/arabic-movies.json'
+import foreign from '../content/ar/foreign-movies.json'
+const arabic = { ...foreign, items: foreign.items.filter(item => item.work.type === 'film') }
 import { parseCategoryContent } from './validation'
 
 describe('category JSON validation', () => {

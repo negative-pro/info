@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import { ContentError, saveContent } from './content-store.ts'
+import { ContentError, saveContent, setContentVisibility, updateSocialAccount } from './content-store.ts'
 
 export function localEditorPlugin(): Plugin {
   let pending = Promise.resolve()
@@ -7,8 +7,9 @@ export function localEditorPlugin(): Plugin {
     name: 'local-content-editor',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use('/__local/content', (request, response, next) => {
-        if (request.url !== '/' && request.url !== '') return next()
+      server.middlewares.use('/__local', (request, response, next) => {
+        const social = request.url === '/social'
+        if (!social && request.url !== '/content') return next()
         const remote = request.socket.remoteAddress
         const host = request.headers.host
         const local = remote === '127.0.0.1' || remote === '::1' || remote === '::ffff:127.0.0.1'
@@ -17,7 +18,7 @@ export function localEditorPlugin(): Plugin {
         if (!local || !hostIsLocal || !origin || origin !== `http://${host}` || request.headers['sec-fetch-site'] === 'cross-site') {
           response.writeHead(403).end(JSON.stringify({ error: 'localOnly' })); return
         }
-        if (request.method !== 'POST' || !request.headers['content-type']?.startsWith('application/json')) {
+        if (!(social ? request.method === 'PATCH' : ['POST', 'PATCH'].includes(request.method ?? '')) || !request.headers['content-type']?.startsWith('application/json')) {
           response.writeHead(405).end(JSON.stringify({ error: 'invalid' })); return
         }
         response.setHeader('Content-Type', 'application/json')
@@ -35,8 +36,8 @@ export function localEditorPlugin(): Plugin {
             try {
               let payload: unknown
               try { payload = JSON.parse(body) } catch { throw new ContentError('invalid') }
-              const result = await saveContent(server.config.root, payload)
-              response.writeHead(201).end(JSON.stringify(result))
+              const result = await (social ? updateSocialAccount : request.method === 'PATCH' ? setContentVisibility : saveContent)(server.config.root, payload)
+              response.writeHead(request.method === 'PATCH' ? 200 : 201).end(JSON.stringify(result))
             } catch (error) {
               response.writeHead(error instanceof ContentError ? 400 : 500).end(JSON.stringify({ error: error instanceof ContentError ? error.code : 'saveFailed' }))
             }

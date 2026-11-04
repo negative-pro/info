@@ -2,7 +2,6 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { categories, providers } from '../data/catalog'
-import { platformIds } from '../data/platforms'
 import text from '../content/ar/texts.json'
 import type { ContentItem, WorkDetails, SaveContentRequest } from '../models/content'
 import './LocalEditor.css'
@@ -12,7 +11,6 @@ export default function LocalEditor() {
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? '')
   const [workType, setWorkType] = useState<WorkDetails['type']>('film')
   const [mode, setMode] = useState('none')
-  const [platform, setPlatform] = useState<ContentItem['platform']>('youtube')
   const [sources, setSources] = useState<number[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -29,8 +27,8 @@ export default function LocalEditor() {
     const names = (key: string) => get(key).split(/[,،\n]/).map(value => value.trim()).filter(Boolean)
     const post: Omit<ContentItem, 'id'> = {
       work: null,
-      platform, kind: 'video', title: get('title'), description: get('description'),
-      body: get('body').split('\n').map(value => value.trim()).filter(Boolean), externalUrl: nullable('externalUrl'),
+      platform: 'youtube', kind: 'video', title: get('title'), description: get('description'),
+      body: [], externalUrl: nullable('externalUrl'),
       videoLayout: get('videoLayout') as ContentItem['videoLayout'], isDemo: false, publishedAt: nullable('publishedAt'),
     }
     let work: WorkDetails | null = null
@@ -54,17 +52,15 @@ export default function LocalEditor() {
     } catch { setError(labels.errors.saveFailed) } finally { setSaving(false) }
   }
   return <section className="page-section local-editor">
-    <span className="eyebrow">{labels.localNotice}</span><h1>{labels.title}</h1><p className="page-description">{labels.description}</p><p className="editor-help">{labels.requiredHint} {labels.optionalHint} {labels.thumbnailAutomatic}</p>
-    {saved && <div className="editor-success" role="status"><p>{labels.saved} <bdi>{saved.file}</bdi></p><Link className="text-link" to={`/story/${saved.id}`}>{labels.viewPost}</Link><button type="button" onClick={() => { setSaved(null); document.querySelector<HTMLFormElement>('.editor-form')?.reset(); setMode('none'); setWorkType('film'); setPlatform('youtube'); setCategoryId(categories[0]?.id ?? ''); setSources([]) }}>{labels.addAnother}</button></div>}
+    <Link className="text-link" to="/dashboard">{text.dashboard.back}</Link><span className="eyebrow">{labels.localNotice}</span><h1>{labels.title}</h1><p className="page-description">{labels.description}</p><p className="editor-help">{labels.requiredHint} {labels.optionalHint} {labels.thumbnailAutomatic}</p>
+    {saved && <div className="editor-success" role="status"><p>{labels.saved} <bdi>{saved.file}</bdi></p><Link className="text-link" to={`/story/${saved.id}`}>{labels.viewPost}</Link><button type="button" onClick={() => { setSaved(null); document.querySelector<HTMLFormElement>('.editor-form')?.reset(); setMode('none'); setWorkType('film'); setCategoryId(categories[0]?.id ?? ''); setSources([]) }}>{labels.addAnother}</button></div>}
     <form className="editor-form" onSubmit={submit}>
       <fieldset disabled={saving || !!saved}><legend>{labels.postSection}</legend><div className="editor-grid">
         <label>{labels.category} *<select name="categoryId" value={categoryId} onChange={event => setCategoryId(event.target.value)} required>{categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-        <label>{labels.platform} *<select name="platform" value={platform} onChange={event => setPlatform(event.target.value as ContentItem['platform'])}>{platformIds.map(id => <option key={id} value={id}>{text.catalog.platforms[id]}</option>)}</select></label>
         <label className="editor-full">{labels.titleLabel} *<input name="title" required maxLength={1000} dir="auto"/></label>
         <label className="editor-full">{labels.descriptionLabel}<textarea name="description" rows={2} maxLength={12000}/></label>
-        <label className="editor-full">{labels.body}<textarea name="body" rows={4}/><small>{labels.bodyHint}</small></label>
-        <label className="editor-full">{labels.externalUrl}{platform !== 'website' && ' *'}<input name="externalUrl" type="url" dir="ltr" required={platform !== 'website'}/></label>
-        <label>{labels.layout}<select name="videoLayout" key={platform} defaultValue={['tiktok', 'facebook', 'instagram'].includes(platform) ? 'portrait' : 'landscape'}><option value="landscape">{labels.landscape}</option><option value="portrait">{labels.portrait}</option></select></label>
+        <label className="editor-full">{labels.externalUrl} *<input name="externalUrl" type="url" dir="ltr" required/></label>
+        <label>{labels.layout}<select name="videoLayout" defaultValue="landscape"><option value="landscape">{labels.landscape}</option><option value="portrait">{labels.portrait}</option></select></label>
         <label>{labels.publishedAt}<input name="publishedAt" type="date"/></label>
       </div></fieldset>
       <fieldset disabled={saving || !!saved}><legend>{labels.productionSection}</legend>
@@ -81,7 +77,7 @@ export default function LocalEditor() {
             : <label>{labels.runtimeMinutes}<input name="runtimeMinutes" type="number" min={1} max={Number.MAX_SAFE_INTEGER} step={1}/></label>}
           <label>{labels.franchise}<input name="franchise" dir="auto"/></label>
           <label className="editor-full">{labels.synopsis}<textarea name="synopsis" rows={3} maxLength={12000} dir="auto"/></label>
-          {(['cast', 'genres', 'countries', 'languages'] as const).map(key => <label key={key}>{labels[key]}<textarea name={key} rows={2}/><small>{labels.namesHint}</small></label>)}
+          {(['cast', 'genres', 'countries', 'languages'] as const).map(key => <label key={key}>{labels[key]}<textarea name={key} rows={2} placeholder={key === 'genres' ? labels.genresPlaceholder : undefined}/><small>{labels.namesHint}</small></label>)}
           <label>{labels.year}<input name="year" type="number" min={1888} max={2200}/></label>
           {(['directors', 'writers', 'editors'] as const).map(key => <label key={key}>{labels[key]}<textarea name={key} rows={2}/><small>{labels.namesHint}</small></label>)}
           <div className="editor-full editor-provider-options"><span>{labels.providers}</span>{providers.map(provider => <label key={provider.id}><input type="checkbox" name="providerIds" value={provider.id}/><span dir="auto">{provider.name}</span></label>)}</div>

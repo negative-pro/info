@@ -20,8 +20,8 @@ describe('catalog data integrity', () => {
   it('has valid foreign keys, content kinds, and external URLs', () => {
     for (const post of items) {
       expect(categories.some(category => category.id === post.categoryId)).toBe(true)
-      expect(['post', 'video']).toContain(post.kind)
-      expect(['youtube', 'facebook', 'instagram', 'tiktok', 'website']).toContain(post.platform)
+      expect(post.kind).toBe('video')
+      expect(post.platform).toBe('youtube')
       if (post.externalUrl) {
         const url = new URL(post.externalUrl)
         expect(url.protocol).toBe('https:')

@@ -12,6 +12,7 @@ export interface CategoryContent {
 }
 
 export interface SocialAccount {
+  hidden?: boolean
   id: string
   name: string
   latin: string

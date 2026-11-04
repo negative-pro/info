@@ -10,7 +10,8 @@ const files = import.meta.glob<unknown>('../content/ar/*-movies.json', {
 })
 export const categoryContent = Object.entries(files).map(([source, value]) => parseCategoryContent(value, source)).toSorted((a, b) => a.category.order - b.category.order)
 export const categories = categoryContent.map(file => file.category)
-export const items: CatalogItem[] = categoryContent.flatMap(file => file.items.map(item => ({ ...item, categoryId: file.category.id }))).toSorted((a, b) => Number(a.isDemo) - Number(b.isDemo))
+export const allItems: CatalogItem[] = categoryContent.flatMap(file => file.items.map(item => ({ ...item, categoryId: file.category.id }))).toSorted((a, b) => Number(a.isDemo) - Number(b.isDemo))
+export const items = allItems.filter(item => !item.hidden)
 export const providers: Provider[] = providerData
 export const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 // The glob lets you add provider icons to src/assets without changing components.

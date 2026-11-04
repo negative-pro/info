@@ -1,5 +1,5 @@
-import lightLogo from '../assets/brank_dark.png'
-import darkLogo from '../assets/brand_logo.png'
+import lightLogo from '../assets/brand/logo-black.png'
+import darkLogo from '../assets/brand/logo-white.png'
 import text from '../content/ar/texts.json'
 
 export default function BrandLogo() {

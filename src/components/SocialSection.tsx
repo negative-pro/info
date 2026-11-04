@@ -18,9 +18,10 @@ const dateFormat = new Intl.DateTimeFormat('ar', { dateStyle: 'medium' })
 const hasCount = (count: number | null) => count !== null && Number.isFinite(count) && count >= 0
 
 export default function SocialSection({ accounts = accountData }: { accounts?: SocialAccount[] }) {
+  if (!accounts.some(account => !account.hidden)) return null
   return <section className="social-section" id="social">
     <div className="section-heading"><div><h2>{text.social.title}</h2><p>{text.social.description}</p></div></div>
-    <div className="social-grid">{accounts.map(account => {
+    <div className="social-grid">{accounts.filter(account => !account.hidden).map(account => {
       const subscribers = hasCount(account.subscriberCount)
       const followers = hasCount(account.followerCount)
       const parsedDate = account.statsUpdatedAt ? new Date(account.statsUpdatedAt) : null
