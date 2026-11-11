@@ -10,6 +10,7 @@ import Appearance from './components/Appearance'
 import LegalPage from './pages/LegalPage'
 import legal from './content/ar/legal.json'
 import SocialSection from './components/SocialSection'
+import { ArticlesSection, BlogPage, ArticleDetail } from './components/Articles'
 import { categories, items, providers, providerIcon } from './data/catalog'
 import type { CatalogItem, WorkDetails } from './models/content'
 import negativePlaceholder from './assets/placeholders/content-placeholder.png'
@@ -43,7 +44,7 @@ function Header() {
   }
   const { pathname } = useLocation()
   const inDiscover = pathname === '/discover' || pathname.startsWith('/category/') || pathname.startsWith('/story/')
-  return <header className="header"><div className="nav-wrap"><Link to="/" onClick={scrollToTop} className="brand" aria-label={text.brand}><BrandLogo/></Link><nav aria-label={text.nav.label}>{(['home', 'discover', 'about'] as const).map((key) => key === 'discover' ? <Link key={key} onClick={scrollToTop} to="/discover" className={inDiscover ? 'active' : undefined} aria-current={inDiscover ? 'page' : undefined}>{text.nav[key]}</Link> : <NavLink key={key} onClick={scrollToTop} to={key === 'home' ? '/' : `/${key}`} end>{text.nav[key]}</NavLink>)}</nav></div></header>
+  return <header className="header"><div className="nav-wrap"><Link to="/" onClick={scrollToTop} className="brand" aria-label={text.brand}><BrandLogo/></Link><nav aria-label={text.nav.label}>{(['home', 'discover', 'blog', 'about'] as const).map((key) => key === 'discover' ? <Link key={key} onClick={scrollToTop} to="/discover" className={inDiscover ? 'active' : undefined} aria-current={inDiscover ? 'page' : undefined}>{text.nav[key]}</Link> : <NavLink key={key} onClick={scrollToTop} to={key === 'home' ? '/' : `/${key}`} end={key !== 'blog'}>{text.nav[key]}</NavLink>)}</nav></div></header>
 }
 function StoryCard({ story }: { story: CatalogItem }) {
   const category = categories.find(item => item.id === story.categoryId)
@@ -74,7 +75,8 @@ function Home() {
       <img src={homeBanner} alt={`${text.brandLatin} — ${text.tagline}`} fetchPriority="high"/>
     </div>
     <CategoryLinks/>
-    <section className="stories-section"><div className="section-heading"><div><h2>{text.home.latest}</h2><p>{text.home.latestDescription}</p></div><Link className="text-link" to="/discover">{text.home.all}<ArrowLeft size={17}/></Link></div><div className="story-grid home-story-grid">{items.slice(0, 8).map(story => <StoryCard key={story.id} story={story}/>)}<Link className="catalog-card more-stories-card" to="/discover"><Clapperboard size={36}/><h3>{text.home.moreStories}</h3><ArrowLeft size={24}/></Link></div></section>
+    <section className="home-videos" aria-labelledby="home-videos-title"><div className="section-heading"><div><h2 id="home-videos-title">{text.home.latest}</h2><p>{text.home.latestDescription}</p></div></div><div className="home-video-grid">{items.filter(item => item.platform === 'youtube').toSorted((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? '')).slice(0, 4).map(story => <article className="home-video-card" key={story.id}><PostThumbnail post={story}/><Link className="home-video-title" to={`/story/${story.id}`}><h3><MixedText>{story.title}</MixedText></h3></Link><Link className="text-link" to={`/story/${story.id}`}>{text.catalog.readMore}<ArrowLeft size={14} aria-hidden="true"/></Link></article>)}</div><div className="home-more"><Link className="button primary" to="/discover">{text.home.seeMore}<ArrowLeft size={17} aria-hidden="true"/></Link></div></section>
+    <ArticlesSection/>
     <SocialSection/>
   </>
 }
@@ -164,6 +166,6 @@ function StoryDetail() {
 }
 function NotFound() { return <section className="page-section"><h1>{text.notFound.title}</h1><Link className="button primary" to="/">{text.notFound.action}</Link></section> }
 export function Site() {
-  return <><ScrollRestoration/><a href="#main" className="skip-link">{text.nav.skip}</a><Header/><main id="main"><Routes><Route path="/" element={<Home/>}/><Route path="/discover" element={<Discover/>}/><Route path="/category/:categorySlug" element={<Discover/>}/><Route path="/about" element={<About/>}/><Route path="/legal/:slug" element={<LegalPage/>}/><Route path="/story/:id" element={<StoryDetail/>}/><Route path="*" element={<NotFound/>}/>{import.meta.env.DEV && LocalEditor && <><Route path="/dashboard" element={<Suspense fallback={null}>{Dashboard && <Dashboard/>}</Suspense>}/><Route path="/dashboard/new" element={<Suspense fallback={null}><LocalEditor/></Suspense>}/><Route path="/local/add" element={<Navigate to="/dashboard/new" replace/>}/></>}</Routes></main><footer className="site-footer"><div className="footer-top"><Link className="footer-brand" to="/" aria-label={text.brand}><BrandLogo/><span>{text.footer.description}</span></Link><div className="footer-appearance"><span>{text.appearance.label}</span><Appearance/></div></div><div className="footer-bottom"><nav className="footer-links" aria-label={legal.navLabel}>{legal.pages.map(page => <Link key={page.slug} to={`/legal/${page.slug}`}>{page.title}</Link>)}</nav><small>© {currentYear} {text.footer.copyright}</small></div></footer></>
+  return <><ScrollRestoration/><a href="#main" className="skip-link">{text.nav.skip}</a><Header/><main id="main"><Routes><Route path="/" element={<Home/>}/><Route path="/discover" element={<Discover/>}/><Route path="/category/:categorySlug" element={<Discover/>}/><Route path="/about" element={<About/>}/><Route path="/blog" element={<BlogPage/>}/><Route path="/blog/:id" element={<ArticleDetail notFound={<NotFound/>}/>}/><Route path="/legal/:slug" element={<LegalPage/>}/><Route path="/story/:id" element={<StoryDetail/>}/><Route path="*" element={<NotFound/>}/>{import.meta.env.DEV && LocalEditor && <><Route path="/dashboard" element={<Suspense fallback={null}>{Dashboard && <Dashboard/>}</Suspense>}/><Route path="/dashboard/new" element={<Suspense fallback={null}><LocalEditor/></Suspense>}/><Route path="/local/add" element={<Navigate to="/dashboard/new" replace/>}/></>}</Routes></main><footer className="site-footer"><div className="footer-top"><Link className="footer-brand" to="/" aria-label={text.brand}><BrandLogo/><span>{text.footer.description}</span></Link><div className="footer-appearance"><span>{text.appearance.label}</span><Appearance/></div></div><div className="footer-bottom"><nav className="footer-links" aria-label={legal.navLabel}>{legal.pages.map(page => <Link key={page.slug} to={`/legal/${page.slug}`}>{page.title}</Link>)}</nav><small>© {currentYear} {text.footer.copyright}</small></div></footer></>
 }
 export default function App() { return <HashRouter><Site/></HashRouter> }

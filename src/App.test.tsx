@@ -6,6 +6,7 @@ import { Site } from './App'
 import { categories, items } from './data/catalog'
 import text from './content/ar/texts.json'
 import accounts from './content/ar/social-accounts.json'
+import { articles } from './data/articles'
 
 // Public-layout fixtures stay visible regardless of local dashboard changes.
 vi.mock('./data/catalog', async importOriginal => {
@@ -66,11 +67,32 @@ describe('Arabic website catalog', () => {
     await userEvent.click(screen.getByRole('link', { name: text.nav.discover }))
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(text.discover.title)
   })
+  it('limits compact home videos and links to the unchanged full Discover catalog', async () => {
+    page('/')
+    expect(document.querySelectorAll('.home-video-card')).toHaveLength(4)
+    expect(document.querySelector('.home-video-card .card-description')).toBeNull()
+    expect(screen.getByRole('heading', { name: articles[0].title })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('link', { name: text.home.seeMore }))
+    expect(document.querySelectorAll('.catalog-card')).toHaveLength(items.length)
+    expect(document.querySelector('.home-video-card')).toBeNull()
+  })
+  it('shows published articles in the blog', () => {
+    page('/blog')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(text.blog.title)
+    expect(screen.getByRole('heading', { name: articles[0].title })).toBeInTheDocument()
+  })
   it.each(['/discover', '/category/arabic', `/story/${rip.id}`])('keeps Discover active on %s', path => {
     page(path)
     expect(screen.getByRole('link', { name: text.nav.discover })).toHaveClass('active')
     expect(screen.getByRole('link', { name: text.nav.discover })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('link', { name: text.nav.home })).not.toHaveClass('active')
+  })
+  it.each(['/blog', `/blog/${articles[0].id}`])('keeps Articles active on %s', path => {
+    page(path)
+    expect(screen.getByRole('link', { name: text.nav.blog })).toHaveClass('active')
+    expect(screen.getByRole('link', { name: text.nav.blog })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: text.nav.home })).not.toHaveClass('active')
+    expect(screen.getByRole('link', { name: text.nav.discover })).not.toHaveClass('active')
   })
   it('shows only YouTube posts and ignores old platform URLs', () => {
     page('/discover?platform=tiktok')

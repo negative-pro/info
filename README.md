@@ -106,3 +106,7 @@ Run the development server and open `/#/dashboard` (the site uses hash routing),
 Hide/show controls persist the optional `hidden` boolean in the item's category JSON. Hidden items remain available in the dashboard but are excluded from Home, Discover, category listings, search, and story detail routes. Rebuild and deploy the site to publish visibility changes. The dashboard and writing API are available only in local development, following the existing editor setup.
 
 The dashboard also manages social-account visibility and audience statistics. Hide/show and saved numbers update `src/content/ar/social-accounts.json` through the local API. Blank statistic fields save as `null` and are omitted from public cards; zero is displayed. Hidden accounts are omitted from the public social section.
+
+## Articles
+
+The blog stores each article in its own JSON file with one matching cover image. See [the article format](src/content/ar/articles/README.md) for JSON fields, publication status, and matching cover-image filenames. The home page shows four compact YouTube cards and up to three published articles.
