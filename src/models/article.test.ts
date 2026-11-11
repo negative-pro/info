@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { parseArticle } from './article'
-const article = { id: 'first-article', title: 'عنوان', excerpt: 'مقدمة', writer: 'كاتب', readMinutes: 4, publishedAt: '2026-11-11', imageAlt: 'صورة المقال', paragraphs: ['فقرة أولى', 'فقرة ثانية'], status: 'published' }
+const article = { id: 'first-article', language: 'ar', workLanguage: 'arabic', title: 'عنوان', excerpt: 'مقدمة', writer: 'كاتب', readMinutes: 4, publishedAt: '2026-11-11', imageAlt: 'صورة المقال', tags: [], paragraphs: ['فقرة أولى', 'فقرة ثانية'], status: 'published' }
 it('accepts complete articles and drafts', () => {
   expect(parseArticle(article, 'article.json')).toEqual(article)
   expect(parseArticle({ ...article, status: 'draft' }, 'draft.json').status).toBe('draft')

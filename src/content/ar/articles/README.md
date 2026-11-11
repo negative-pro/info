@@ -10,6 +10,8 @@ Example structure (documentation only; no sample article is published):
 ```json
 {
   "id": "cinema-and-memory",
+  "language": "ar",
+  "workLanguage": "foreign",
   "title": "السينما والذاكرة",
   "excerpt": "مقدمة قصيرة تظهر في بطاقة المقال.",
   "writer": "اسم الكاتب",
@@ -20,6 +22,8 @@ Example structure (documentation only; no sample article is published):
   "status": "draft"
 }
 ```
+
+`language` is a required BCP 47 language tag for the article text (for example, `ar` or `en`). `workLanguage` is required and describes the movie or series discussed: use `arabic` or `foreign`. Set `coverImage` to an image filename in `src/assets/articles/` when its name differs from the article ID; otherwise, the ID-based filename is used.
 
 Store the cover as `src/assets/articles/cinema-and-memory.webp`.
 Set `status` to `published` once the text and cover are ready.

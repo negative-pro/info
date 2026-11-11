@@ -675,3 +675,23 @@ a.detail-art { position: relative; }
 .blog-page .blog-card h3 { height: 5.85em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; text-overflow: ellipsis; text-wrap: wrap; }
 .blog-page .blog-card-copy p { height: 4em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; text-overflow: ellipsis; }
 .blog-page .blog-card > .article-facts { grid-template-columns: 1.4fr 1fr; }
+
+.blog-tags { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 28px 0 0; padding: 0; }
+.blog-tags li { padding: 4px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--raised); color: var(--muted); font-size: 11px; line-height: 1.8; }
+
+.blog-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 20px; }
+.blog-filters button { padding: 8px 20px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 12px; cursor: pointer; }
+.blog-filters button[aria-pressed='true'] { background: var(--primary-bg); border-color: var(--primary-bg); color: var(--primary-text); }
+
+.blog-related { margin-top: 56px; }
+.blog-related > h2 { margin: 0; font-size: 24px; }
+
+.blog-related-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+.blog-card-compact { display: block; height: 132px; }
+.blog-card-compact .blog-card-link { height: 100%; display: grid; grid-template-columns: 112px minmax(0, 1fr); overflow: hidden; }
+.blog-card-compact .blog-card-link > a { display: block; width: 112px; height: 100%; overflow: hidden; }
+.blog-card-compact .blog-card-link > a img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.blog-card-compact .blog-card-copy { min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 8px; overflow: hidden; padding: 12px 14px; border-top: 0; }
+.blog-card-compact h3 { flex: 0 0 3.4em; width: 100%; min-height: 3.4em; max-height: 3.4em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 14px; line-height: 1.7; }
+.blog-card-compact .text-link { display: inline-flex; flex: 0 0 auto; min-height: 20px; font-size: 10px; line-height: 20px; }
+@media (max-width: 560px) { .blog-related-grid { grid-template-columns: 1fr; } .blog-card-compact { height: 112px; } .blog-card-compact .blog-card-link { grid-template-columns: 96px minmax(0, 1fr); } .blog-card-compact .blog-card-link > a { width: 96px; } }
