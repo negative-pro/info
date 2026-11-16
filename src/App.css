@@ -613,6 +613,12 @@ a.detail-art { position: relative; }
 .blog-detail header { margin-block: 28px 32px; padding-block: 8px 24px; border-bottom: 1px solid var(--border); }
 .blog-detail h1 { font-size: clamp(25px, 3.4vw, 38px); font-weight: 700; line-height: 1.9; margin-block: 0 22px; letter-spacing: 0; text-align: start; text-wrap: balance; overflow-wrap: break-word; color: var(--text); }
 .blog-cover { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; }
+.blog-cover-button { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; cursor: default; }
+.blog-cover-hint { position: absolute; bottom: 14px; left: 14px; padding: 5px 9px; border-radius: 6px; background: rgba(0, 0, 0, .72); color: #fff; font-size: 11px; line-height: 1.5; pointer-events: none; }
+.blog-cover-button:focus-visible { outline: 3px solid currentColor; outline-offset: 4px; border-radius: 18px; }
+.blog-image-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0, 0, 0, .9); cursor: zoom-out; }
+.blog-image-overlay > img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: default; }
+.blog-image-close { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #fff; color: #111; cursor: pointer; }
 .blog-body { margin-top: 30px; font-size: 15px; line-height: 2.6; overflow-wrap: anywhere; }
 .blog-body p { text-align: justify; text-align-last: start; }
 .blog-body p + p { margin-top: 22px; }

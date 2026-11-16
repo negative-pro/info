@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, Clock, UserRound } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Clock, UserRound, X } from 'lucide-react'
 import type { Article } from '../models/article'
 import { articles, articleImage } from '../data/articles'
 import text from '../content/ar/texts.json'
@@ -28,9 +29,16 @@ export function BlogPage() {
   return <section className="page-section blog-page"><h1>{labels.title}</h1><p className="page-description">{labels.description}</p><div className="blog-filters" role="group" aria-label="تصفية المقالات حسب لغة العمل"><button type="button" aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>الكل</button><button type="button" aria-pressed={filter === 'arabic'} onClick={() => setFilter('arabic')}>عربي</button><button type="button" aria-pressed={filter === 'foreign'} onClick={() => setFilter('foreign')}>أجنبي</button></div>{filteredArticles.length ? <div className="blog-grid">{filteredArticles.map(article => <ArticleCard key={article.id} article={article}/>)}</div> : <p className="blog-empty">{labels.empty}</p>}</section>
 }
 export function ArticleDetail({ notFound }: { notFound: ReactNode }) {
+  const [imageOpen, setImageOpen] = useState(false)
+  useEffect(() => {
+    if (!imageOpen) return
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') setImageOpen(false) }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [imageOpen])
   const { id } = useParams()
   const article = articles.find(item => item.id === id)
   if (!article) return notFound
   const related = articles.filter(item => item.id !== article.id && item.workLanguage === article.workLanguage).slice(0, 3)
-  return <article className="page-section blog-detail"><Link className="text-link" to="/blog"><ArrowLeft size={16} aria-hidden="true"/>{labels.back}</Link><header><h1><MixedText>{article.title}</MixedText></h1><p className="page-description"><MixedText>{article.excerpt}</MixedText></p><ArticleMeta article={article}/></header><img className="blog-cover" src={articleImage(article.id, article.coverImage)} alt={article.imageAlt} fetchPriority="high"/><div className="blog-body">{article.paragraphs.map((paragraph, index) => typeof paragraph === 'string' ? <p key={index}><MixedText>{paragraph}</MixedText></p> : <h2 key={index}><MixedText>{paragraph.text}</MixedText></h2>)}</div>{!!article.tags?.length && <ul className="blog-tags" aria-label="وسوم المقال">{article.tags.map(tag => <li key={tag}>{tag.replace(/^#/, '')}</li>)}</ul>}{related.length > 0 && <section className="blog-related" aria-labelledby="blog-related-title"><h2 id="blog-related-title">{labels.readAlso}</h2><div className="blog-related-grid">{related.map(item => <ArticleCard key={item.id} article={item} compact/>)}</div></section>}</article>
+  return <><article className="page-section blog-detail"><Link className="text-link" to="/blog"><ArrowLeft size={16} aria-hidden="true"/>{labels.back}</Link><header><h1><MixedText>{article.title}</MixedText></h1><p className="page-description"><MixedText>{article.excerpt}</MixedText></p><ArticleMeta article={article}/></header><button className="blog-cover-button" type="button" onClick={() => setImageOpen(true)} aria-label="عرض الصورة بالحجم الكامل"><img className="blog-cover" src={articleImage(article.id, article.coverImage)} alt={article.imageAlt} fetchPriority="high"/><span className="blog-cover-hint">عرض الصورة كاملة</span></button><div className="blog-body">{article.paragraphs.map((paragraph, index) => typeof paragraph === 'string' ? <p key={index}><MixedText>{paragraph}</MixedText></p> : <h2 key={index}><MixedText>{paragraph.text}</MixedText></h2>)}</div>{!!article.tags?.length && <ul className="blog-tags" aria-label="وسوم المقال">{article.tags.map(tag => <li key={tag}>{tag.replace(/^#/, '')}</li>)}</ul>}{related.length > 0 && <section className="blog-related" aria-labelledby="blog-related-title"><h2 id="blog-related-title">{labels.readAlso}</h2><div className="blog-related-grid">{related.map(item => <ArticleCard key={item.id} article={item} compact/>)}</div></section>}</article>{imageOpen && createPortal(<div className="blog-image-overlay" role="dialog" aria-modal="true" aria-label={article.imageAlt} onClick={() => setImageOpen(false)}><button type="button" className="blog-image-close" aria-label="إغلاق الصورة" onClick={() => setImageOpen(false)}><X aria-hidden="true"/></button><img src={articleImage(article.id, article.coverImage)} alt={article.imageAlt} onClick={event => event.stopPropagation()}/></div>, document.body)}</>
 }
