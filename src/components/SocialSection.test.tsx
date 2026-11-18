@@ -24,7 +24,7 @@ it('shows supplied statistics and a localized community invitation', () => {
   expect(document.querySelector('time')).toHaveAttribute('dateTime', account.statsUpdatedAt)
 })
 it('supports subscribers and leaves absent statistics hidden', () => {
-  render(<SocialSection accounts={[{ ...accounts[0], subscriberCount: 1000 }]}/>)
+  render(<SocialSection accounts={[{ ...accounts[0], followerCount: null, subscriberCount: 1000 }]}/>)
   expect(screen.getByText(text.social.subscribers)).toBeInTheDocument()
   expect(screen.queryByText(text.social.followers)).not.toBeInTheDocument()
   expect(screen.queryByText(text.social.monthlyVisitors)).not.toBeInTheDocument()
