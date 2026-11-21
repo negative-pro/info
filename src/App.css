@@ -573,6 +573,19 @@ a.detail-art { position: relative; }
 :is(.discover-page, .home-story-grid) .catalog-card > .story-card { height: 140px; flex-shrink: 0; }
 :is(.discover-page, .home-story-grid) .card-provider-footer { margin-top: auto; min-height: 54px; flex-shrink: 0; }
 
+@media (max-width: 560px) {
+  .discover-page .discover-story-grid { gap: 12px; grid-auto-rows: auto; }
+  .discover-page .catalog-card { display: grid; grid-template-columns: 104px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; direction: rtl; min-height: 104px; border-radius: 14px; }
+  .discover-page .catalog-card > .story-art { grid-column: 1; grid-row: 1 / 3; width: 104px; height: 100%; min-height: 104px; aspect-ratio: auto; }
+  .discover-page .catalog-card > .story-card { grid-column: 2; grid-row: 1; height: auto; min-width: 0; padding: 10px 12px 0; }
+  .discover-page .catalog-card .story-meta { margin-bottom: 4px; }
+  .discover-page .catalog-card h3 { height: auto; min-height: 0; font-size: 13px; line-height: 1.7; }
+  .discover-page .card-description { display: none; }
+  .discover-page .card-provider-footer { display: none; }
+  .discover-page .card-provider-footer .provider-badge { min-height: 24px; padding: 2px 6px; }
+  .discover-page .card-read-more { white-space: nowrap; }
+}
+
 .legal-page p a { text-decoration: underline; overflow-wrap: anywhere; }
 
 /* Card previews match the shared cover size; detail players keep more room. */
@@ -701,3 +714,11 @@ a.detail-art { position: relative; }
 .blog-card-compact h3 { flex: 0 0 3.4em; width: 100%; min-height: 3.4em; max-height: 3.4em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 14px; line-height: 1.7; }
 .blog-card-compact .text-link { display: inline-flex; flex: 0 0 auto; min-height: 20px; font-size: 10px; line-height: 20px; }
 @media (max-width: 560px) { .blog-related-grid { grid-template-columns: 1fr; } .blog-card-compact { height: 112px; } .blog-card-compact .blog-card-link { grid-template-columns: 96px minmax(0, 1fr); } .blog-card-compact .blog-card-link > a { width: 96px; } }
+
+@media (max-width: 560px) {
+  .discover-page .catalog-card > .story-art.platform-preview { grid-column: 1; grid-row: 1 / 3; width: 104px; height: 100%; min-height: 104px; aspect-ratio: auto; }
+  .discover-page .platform-preview iframe { display: none; }
+  .discover-page .platform-preview-link { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+  .discover-page .platform-preview-link .platform-symbol { display: none; }
+  .discover-page .thumbnail-platform { display: none; }
+}
